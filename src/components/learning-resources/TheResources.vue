@@ -1,8 +1,6 @@
 <template>
 	<BaseCard>
-		<BaseButton
-			@click="setCurrentTab('StoreResource')"
-			:mode="StoreResourceButtonMode"
+		<BaseButton @click="goToStoreResource" :mode="StoreResourceButtonMode"
 			>Store Resources</BaseButton
 		>
 		<BaseButton
@@ -18,27 +16,18 @@
 </template>
 
 <script setup>
-import { v4 as uuidv4 } from "uuid";
-import { ref, reactive, provide } from "vue";
+import { ref, provide, onMounted } from "vue";
 
 import StoreResource from "@/components/learning-resources/StoreResource.vue";
 import AddResource from "@/components/learning-resources/AddResource.vue";
 import { computed } from "@vue/reactivity";
 
-const StoreResources = reactive([
-	{
-		id: "official-guide",
-		title: "Official Guide",
-		description: "The official Vue.js documentation.",
-		link: "https://vuejs.org",
-	},
-	{
-		id: "google",
-		title: "Google",
-		description: "Learn more about Google.",
-		link: "https://google.org",
-	},
-]);
+const isLoading = ref(false);
+const errorMessage = ref(null);
+provide("errorMessage", errorMessage);
+provide("isLoading", isLoading);
+
+const StoreResources = ref([]);
 provide("resources", StoreResources);
 
 const currentTab = ref("StoreResource");
@@ -51,17 +40,37 @@ function setCurrentTab(tab) {
 	currentTab.value = tab;
 }
 
-function addNewResource(title, description, link) {
-	const newResource = {
-		id: uuidv4(),
-		title,
-		description,
-		link,
-	};
-	StoreResources.unshift(newResource);
-	currentTab.value = "StoreResource";
+async function updateStoreResource() {
+	isLoading.value = true;
+	errorMessage.value = null;
+
+	StoreResources.value.length = 0;
+	const resources = await fetch(
+		"https://vue-http-demo-96356-default-rtdb.asia-southeast1.firebasedatabase.app/resources.json"
+	)
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error("could not get datas");
+			}
+		})
+		.catch((error) => {
+			isLoading.value = false;
+			errorMessage.value = error.message;
+		});
+	isLoading.value = false;
+	for (let key in resources) {
+		resources[key].id = key;
+		StoreResources.value.push(resources[key]);
+	}
 }
-provide("addNewResource", addNewResource);
+
+async function goToStoreResource() {
+	await updateStoreResource();
+	setCurrentTab("StoreResource");
+}
+provide("goToStoreResource", goToStoreResource);
 
 // computed
 const StoreResourceButtonMode = computed(() =>
@@ -70,6 +79,11 @@ const StoreResourceButtonMode = computed(() =>
 const AddResourceButtonMode = computed(() =>
 	currentTab.value === "AddResource" ? null : "flat"
 );
+
+// before mount
+onMounted(async () => {
+	await updateStoreResource();
+});
 </script>
 
 <style lang="scss" scoped>

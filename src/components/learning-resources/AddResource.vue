@@ -40,11 +40,14 @@
 			</div>
 		</form>
 	</BaseCard>
+	<BaseCard class="alert-message" v-if="errorMessage">{{
+		errorMessage
+	}}</BaseCard>
 </template>
 
 <script setup>
 import { inject, ref } from "vue";
-import BaseButton from "../UI/BaseButton.vue";
+const errorMessage = ref(null);
 
 const title = ref("");
 const description = ref("");
@@ -52,9 +55,9 @@ const link = ref("");
 
 const inputIsInvalid = ref(false);
 
-const addNewResource = inject("addNewResource");
+const goToStoreResource = inject("goToStoreResource");
 
-function submitHandler() {
+async function submitHandler() {
 	if (
 		title.value.trim() === "" ||
 		description.value.trim() === "" ||
@@ -64,7 +67,33 @@ function submitHandler() {
 		return;
 	}
 
-	addNewResource(title.value, description.value, link.value);
+	errorMessage.value = null;
+	await fetch(
+		"https://vue-http-demo-96356-default-rtdb.asia-southeast1.firebasedatabase.app/resources.json",
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				title: title.value,
+				description: description.value,
+				link: link.value,
+			}),
+		}
+	)
+		.then((response) => {
+			if (response.ok) {
+				// ...
+			} else {
+				throw new Error("Could not save data!");
+			}
+		})
+		.catch((error) => {
+			errorMessage.value = error.message;
+			throw new Error(error);
+		});
+	goToStoreResource();
 
 	title.value = "";
 	description.value = "";
@@ -106,5 +135,12 @@ textarea:focus {
 }
 button.submit {
 	margin-top: 1rem;
+}
+
+// Alert
+.alert-message {
+	text-align: center;
+	font-size: 1.2rem;
+	color: rgb(200, 126, 126);
 }
 </style>

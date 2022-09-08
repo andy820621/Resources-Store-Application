@@ -11,7 +11,7 @@
 			<p>{{ description }}</p>
 
 			<nav>
-				<a :href="link">View Resource</a>
+				<a :href="link" target="_blank">View Resource</a>
 			</nav>
 		</BaseCard>
 	</li>
@@ -25,7 +25,7 @@ const emit = defineEmits(["delete"]);
 
 <style scoped>
 li {
-	margin: auto;
+	margin: 0 auto;
 	min-width: 40rem;
 }
 header {
@@ -48,5 +48,11 @@ a {
 a:hover,
 a:active {
 	color: #c89300;
+}
+nav {
+	margin-top: 0.8rem;
+}
+.noMargin .card {
+	margin: 0;
 }
 </style>
