@@ -1,5 +1,5 @@
 <template>
-	<TheHeader title="RememberMe" />
+	<TheHeader title="Resources App" />
 	<TheResources />
 </template>
 
