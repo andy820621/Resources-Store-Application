@@ -1,5 +1,5 @@
 {
-	"name": "project-name",
+	"name": "resource-store-application",
 	"version": "0.0.0",
 	"scripts": {
 		"dev": "vite --host",
