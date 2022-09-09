@@ -1,6 +1,6 @@
-# Title
+# Resource Store Application
 
-This template should help get you started developing with Vue 3 in Vite.
+Use Vue3 to build this Website, and use Firebase as database, and use Vite as build tool.
 
 ## Project Setup
 
